@@ -6,6 +6,7 @@
   --color-mantis-white: #f0f0f0;
   --color-mantis-gray: #888888;
   --color-mantis-dark-gray: #333333;
+  --color-mantis-green: #74C69D;
 
   /* Typography */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;

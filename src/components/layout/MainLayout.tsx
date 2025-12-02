@@ -1,7 +1,6 @@
 import { Navigation } from "@/components/ui/Navigation";
 import { TimeLocation } from "@/components/ui/TimeLocation";
 import { BottomBranding } from "@/components/layout/BottomBranding";
-import { SoundscapePlayer } from "@/components/audio/SoundscapePlayer";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 
 interface MainLayoutProps {
@@ -13,7 +12,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         <div className="relative min-h-screen w-full bg-mantis-black text-mantis-white overflow-hidden selection:bg-mantis-white selection:text-mantis-black">
             <TimeLocation />
             <Navigation />
-            <SoundscapePlayer />
+            <Navigation />
             <OnboardingWizard />
 
             <main className="relative z-10 w-full">

@@ -4,12 +4,12 @@ import Link from "next/link";
 
 export function BottomBranding() {
     return (
-        <div className="fixed bottom-8 left-8 right-8 z-50 flex items-end justify-between text-xs font-medium tracking-wide text-mantis-white mix-blend-difference pointer-events-none">
+        <div className="fixed bottom-8 left-8 right-8 z-50 flex items-end justify-between text-xs font-medium tracking-wide text-white pointer-events-none drop-shadow-md">
             <div className="flex flex-col gap-1 pointer-events-auto">
                 <Link href="/" className="text-lg font-bold tracking-tighter hover:opacity-70 transition-opacity">
                     DREAMSCAPE
                 </Link>
-                <span className="text-mantis-gray">MADE WITH LOVE ❥</span>
+                <span className="text-white/60">MADE WITH LOVE ❥</span>
             </div>
 
             <div className="absolute left-1/2 -translate-x-1/2 bottom-0 text-center pointer-events-auto">
@@ -20,6 +20,7 @@ export function BottomBranding() {
 
             <div className="pointer-events-auto">
                 <button
+                    type="button"
                     onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
                     className="group flex items-center gap-2 hover:opacity-70 transition-opacity"
                 >
