@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  /* Mantis Color Palette */
+  --color-mantis-black: #000000;
+  --color-mantis-white: #f0f0f0;
+  --color-mantis-gray: #888888;
+  --color-mantis-dark-gray: #333333;
+
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  
+  /* Spacing */
+  --spacing-container: 2rem;
+  
+  /* Animations */
+  --animate-reveal-up: revealUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fade-in: fadeIn 0.8s ease-out forwards;
+
+  @keyframes revealUp {
+    from { 
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+:root {
+  --background: #000000;
+  --foreground: #f0f0f0;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utility Classes */
+.text-balance {
+  text-wrap: balance;
+}
+
+.tracking-widest-custom {
+  letter-spacing: 0.2em;
+}
+
+.tracking-tighter-custom {
+  letter-spacing: -0.04em;
+}
+
+/* Hide scrollbar for clean look */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
