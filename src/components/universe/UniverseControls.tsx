@@ -32,7 +32,7 @@ export function UniverseControls({ onSearch, onFilterTags, availableTags }: Univ
     };
 
     return (
-        <div className="absolute top-24 right-8 z-10 flex flex-col gap-4 w-full max-w-xs pointer-events-none">
+        <div className="absolute top-48 md:top-24 right-8 z-10 flex flex-col gap-4 w-full max-w-[200px] md:max-w-xs pointer-events-none">
             {/* Search Bar */}
             <div className="pointer-events-auto relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

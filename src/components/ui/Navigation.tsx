@@ -21,7 +21,7 @@ export function Navigation() {
     return (
         <>
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex fixed top-8 right-8 z-50 gap-8 font-sans text-xs font-medium tracking-wide text-mantis-white mix-blend-difference">
+            <nav className="hidden md:flex fixed top-8 right-8 z-50 gap-8 font-sans text-xs font-medium tracking-wide text-white drop-shadow-md">
                 {links.map((link) => (
                     <Link
                         key={link.href}
@@ -41,7 +41,7 @@ export function Navigation() {
             {/* Mobile Navigation Toggle */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden fixed top-8 right-8 z-50 text-white mix-blend-difference"
+                className="md:hidden fixed top-8 right-8 z-50 text-white drop-shadow-md"
             >
                 <div className="space-y-2">
                     <span className={`block w-8 h-0.5 bg-current transition-transform ${isOpen ? "rotate-45 translate-y-2.5" : ""}`}></span>

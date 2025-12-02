@@ -14,7 +14,7 @@ export default function UniversePage() {
 
     return (
         <div className="w-full h-full relative">
-            <div className="absolute top-32 left-8 z-10 pointer-events-none flex flex-col gap-4">
+            <div className="absolute top-24 md:top-32 left-8 z-10 pointer-events-none flex flex-col gap-4">
                 <div>
                     <motion.h1
                         initial={{ opacity: 0, y: -20 }}

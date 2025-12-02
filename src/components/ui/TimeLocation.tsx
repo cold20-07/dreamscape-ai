@@ -24,7 +24,7 @@ export function TimeLocation() {
   }, []);
 
   return (
-    <div className="fixed top-8 left-8 z-50 flex flex-col gap-1 font-sans text-xs font-medium tracking-wide text-mantis-white mix-blend-difference">
+    <div className="fixed top-8 left-8 z-50 flex flex-col gap-1 font-sans text-xs font-medium tracking-wide text-white drop-shadow-md">
       <div className="flex items-center gap-2">
         <span>NEW YORK CITY</span>
       </div>
