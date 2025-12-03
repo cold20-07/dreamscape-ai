@@ -2,9 +2,18 @@
 
 import { useDreams } from "@/context/DreamContext";
 import { EntityCard } from "@/components/entities/EntityCard";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { motion } from "framer-motion";
 
 export default function CharactersPage() {
+    return (
+        <ProtectedRoute>
+            <CharactersContent />
+        </ProtectedRoute>
+    );
+}
+
+function CharactersContent() {
     const { characters } = useDreams();
 
     return (

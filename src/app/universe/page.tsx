@@ -4,11 +4,20 @@ import { useState } from "react";
 import { UniverseCanvas } from "@/components/universe/UniverseCanvas";
 import { TimelineView } from "@/components/journal/TimelineView";
 import { DreamModal } from "@/components/journal/DreamModal";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Dream } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutGrid, Box } from "lucide-react";
 
 export default function UniversePage() {
+    return (
+        <ProtectedRoute>
+            <UniverseContent />
+        </ProtectedRoute>
+    );
+}
+
+function UniverseContent() {
     const [viewMode, setViewMode] = useState<'universe' | 'timeline'>('universe');
     const [selectedDream, setSelectedDream] = useState<Dream | null>(null);
 

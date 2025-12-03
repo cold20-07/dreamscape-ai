@@ -1,11 +1,26 @@
 "use client";
 
 import { dreamService } from "@/services/dreamService";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import { Download, Trash2, User, Bell, Shield } from "lucide-react";
 
 export default function SettingsPage() {
+    return (
+        <ProtectedRoute>
+            <SettingsContent />
+        </ProtectedRoute>
+    );
+}
+
+function SettingsContent() {
+    const { user } = useAuth();
     const [isExporting, setIsExporting] = useState(false);
+    
+    const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'Dreamer';
+    const userEmail = user?.email || '';
+    const userInitial = userName.charAt(0).toUpperCase();
 
     const handleExport = async () => {
         setIsExporting(true);
@@ -54,15 +69,12 @@ export default function SettingsPage() {
                     </h2>
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex items-center gap-6">
                         <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-3xl font-bold text-white">
-                            D
+                            {userInitial}
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold text-white">Dreamer</h3>
-                            <p className="text-white/40">Explorer of the Subconscious</p>
+                            <h3 className="text-xl font-bold text-white">{userName}</h3>
+                            <p className="text-white/40">{userEmail}</p>
                         </div>
-                        <button className="ml-auto px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors">
-                            Edit Profile
-                        </button>
                     </div>
                 </section>
 

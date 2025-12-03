@@ -1,5 +1,43 @@
-import { Dream, Character, Location, DreamStats } from "@/types";
+import { Dream, Character, Location, DreamStats, DreamType } from "@/types";
 import { supabase } from "@/lib/supabaseClient";
+
+// Database row types
+interface DreamRow {
+    id: string;
+    title: string;
+    content: string;
+    date: string;
+    type: DreamType;
+    sentiment: number;
+    clarity: number;
+    tags: string[] | null;
+    dream_characters?: { character_id: string }[];
+    dream_locations?: { location_id: string }[];
+}
+
+interface CharacterRow {
+    id: string;
+    name: string;
+    relationship: string;
+    description: string;
+    appearances: number;
+    first_appearance: string;
+    dream_characters?: { dream_id: string }[];
+}
+
+interface LocationRow {
+    id: string;
+    name: string;
+    description: string;
+    appearances: number;
+    dream_locations?: { dream_id: string }[];
+}
+
+interface DreamStatsRow {
+    date: string;
+    clarity: number;
+    sentiment: number;
+}
 
 export const dreamService = {
     // Dreams
@@ -15,7 +53,7 @@ export const dreamService = {
 
         if (error) throw error;
 
-        return (data || []).map((d: any) => ({
+        return (data || []).map((d: DreamRow) => ({
             id: d.id,
             title: d.title,
             content: d.content,
@@ -24,8 +62,8 @@ export const dreamService = {
             sentiment: d.sentiment,
             clarity: d.clarity,
             tags: d.tags || [],
-            characterIds: d.dream_characters?.map((dc: any) => dc.character_id) || [],
-            locationIds: d.dream_locations?.map((dl: any) => dl.location_id) || [],
+            characterIds: d.dream_characters?.map((dc) => dc.character_id) || [],
+            locationIds: d.dream_locations?.map((dl) => dl.location_id) || [],
             relatedDreamIds: [], // TODO: Implement related dreams storage or calculation
         }));
     },
@@ -114,14 +152,14 @@ export const dreamService = {
 
         if (error) throw error;
 
-        return (data || []).map((c: any) => ({
+        return (data || []).map((c: CharacterRow) => ({
             id: c.id,
             name: c.name,
             relationship: c.relationship,
             description: c.description,
             appearances: c.appearances,
             firstAppearance: c.first_appearance,
-            dreamIds: c.dream_characters?.map((dc: any) => dc.dream_id) || []
+            dreamIds: c.dream_characters?.map((dc) => dc.dream_id) || []
         }));
     },
 
@@ -178,12 +216,12 @@ export const dreamService = {
 
         if (error) throw error;
 
-        return (data || []).map((l: any) => ({
+        return (data || []).map((l: LocationRow) => ({
             id: l.id,
             name: l.name,
             description: l.description,
             appearances: l.appearances,
-            dreamIds: l.dream_locations?.map((dl: any) => dl.dream_id) || []
+            dreamIds: l.dream_locations?.map((dl) => dl.dream_id) || []
         }));
     },
 
@@ -279,8 +317,8 @@ export const dreamService = {
             }
         }
 
-        const avgClarity = dreams.reduce((acc: number, d: any) => acc + d.clarity, 0) / totalDreams;
-        const avgSentiment = dreams.reduce((acc: number, d: any) => acc + d.sentiment, 0) / totalDreams;
+        const avgClarity = dreams.reduce((acc: number, d: DreamStatsRow) => acc + d.clarity, 0) / totalDreams;
+        const avgSentiment = dreams.reduce((acc: number, d: DreamStatsRow) => acc + d.sentiment, 0) / totalDreams;
 
         return {
             totalDreams,

@@ -5,9 +5,18 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentDreams } from "@/components/dashboard/RecentDreams";
 import { ContinuationPrompt } from "@/components/dream/ContinuationPrompt";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { motion } from "framer-motion";
 
 export default function DashboardPage() {
+    return (
+        <ProtectedRoute>
+            <DashboardContent />
+        </ProtectedRoute>
+    );
+}
+
+function DashboardContent() {
     const { stats, dreams } = useDreams();
 
     // Fallback stats if null (e.g. loading)
@@ -49,3 +58,4 @@ export default function DashboardPage() {
         </div>
     );
 }
+

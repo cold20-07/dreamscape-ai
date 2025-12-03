@@ -2,11 +2,20 @@
 
 import { ContinuationCard } from "@/components/continuation/ContinuationCard";
 import { useDreams } from "@/context/DreamContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Dream } from "@/types";
 
 export default function ContinuationPage() {
+    return (
+        <ProtectedRoute>
+            <ContinuationContent />
+        </ProtectedRoute>
+    );
+}
+
+function ContinuationContent() {
     const { dreams } = useDreams();
     const [selectedDream, setSelectedDream] = useState<Dream | null>(null);
 

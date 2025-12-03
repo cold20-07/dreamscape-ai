@@ -1,9 +1,13 @@
+"use client";
+
 import { SentimentChart } from "@/components/insights/SentimentChart";
 import { TagCloud } from "@/components/insights/TagCloud";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 export default function InsightsPage() {
     return (
-        <div className="min-h-screen pt-32 px-8 pb-20">
+        <ProtectedRoute>
+            <div className="min-h-screen pt-32 px-8 pb-20">
             <div className="max-w-7xl mx-auto">
                 <header className="mb-12">
                     <h1 className="text-6xl md:text-8xl font-bold text-white mb-4 tracking-tighter">
@@ -41,5 +45,6 @@ export default function InsightsPage() {
                 </div>
             </div>
         </div>
+        </ProtectedRoute>
     );
 }

@@ -1,33 +1,39 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 const COUNT = 2000;
 
+// Seeded random number generator for deterministic results
+function seededRandom(seed: number): number {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+}
+
+// Generate particles outside component for purity
+function generateParticles(): Float32Array {
+    const temp = new Float32Array(COUNT * 3);
+    for (let i = 0; i < COUNT; i++) {
+        const x = (seededRandom(i * 3) - 0.5) * 50;
+        const y = (seededRandom(i * 3 + 1) - 0.5) * 50;
+        const z = (seededRandom(i * 3 + 2) - 0.5) * 50;
+        temp[i * 3] = x;
+        temp[i * 3 + 1] = y;
+        temp[i * 3 + 2] = z;
+    }
+    return temp;
+}
+
+const PARTICLES = generateParticles();
+
 export function Particles() {
     const mesh = useRef<THREE.Points>(null);
     const { pointer, viewport } = useThree();
 
-    const [particles, setParticles] = useState<Float32Array | null>(null);
-
-    useEffect(() => {
-        const temp = new Float32Array(COUNT * 3);
-        for (let i = 0; i < COUNT; i++) {
-            const x = (Math.random() - 0.5) * 50;
-            const y = (Math.random() - 0.5) * 50;
-            const z = (Math.random() - 0.5) * 50;
-            temp[i * 3] = x;
-            temp[i * 3 + 1] = y;
-            temp[i * 3 + 2] = z;
-        }
-        setParticles(temp);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
     useFrame((state) => {
-        if (!mesh.current || !particles) return;
+        if (!mesh.current) return;
 
         const time = state.clock.getElapsedTime();
 
@@ -45,14 +51,12 @@ export function Particles() {
         mesh.current.position.y += (y - mesh.current.position.y) * 0.1;
     });
 
-    if (!particles) return null;
-
     return (
         <points ref={mesh}>
             <bufferGeometry>
                 <bufferAttribute
                     attach="attributes-position"
-                    args={[particles, 3]}
+                    args={[PARTICLES, 3]}
                 />
             </bufferGeometry>
             <pointsMaterial

@@ -1,8 +1,12 @@
+"use client";
+
 import { CalendarHeatmap } from "@/components/timeline/CalendarHeatmap";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 export default function TimelinePage() {
     return (
-        <div className="min-h-screen pt-32 px-8 pb-20">
+        <ProtectedRoute>
+            <div className="min-h-screen pt-32 px-8 pb-20">
             <div className="max-w-7xl mx-auto">
                 <header className="mb-12">
                     <h1 className="text-6xl md:text-8xl font-bold text-white mb-4 tracking-tighter">
@@ -16,5 +20,6 @@ export default function TimelinePage() {
                 <CalendarHeatmap />
             </div>
         </div>
+        </ProtectedRoute>
     );
 }

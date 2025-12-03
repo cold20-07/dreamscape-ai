@@ -12,7 +12,6 @@ export function MainLayout({ children }: MainLayoutProps) {
         <div className="relative min-h-screen w-full bg-mantis-black text-mantis-white overflow-hidden selection:bg-mantis-white selection:text-mantis-black">
             <TimeLocation />
             <Navigation />
-            <Navigation />
             <OnboardingWizard />
 
             <main className="relative z-10 w-full">

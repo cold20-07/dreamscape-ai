@@ -2,10 +2,34 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import { DreamProvider, useDreams } from '../DreamContext';
 import { dreamService } from '@/services/dreamService';
 
+// Mock the Supabase client
+jest.mock('@/lib/supabaseClient', () => ({
+    supabase: {
+        auth: {
+            getSession: jest.fn().mockResolvedValue({ data: { session: null } }),
+            onAuthStateChange: jest.fn().mockReturnValue({
+                data: { subscription: { unsubscribe: jest.fn() } }
+            }),
+            getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'test-user' } } }),
+        },
+        from: jest.fn(),
+    }
+}));
+
+// Mock AuthContext
+jest.mock('@/context/AuthContext', () => ({
+    useAuth: jest.fn().mockReturnValue({
+        user: { id: 'test-user', email: 'test@example.com' },
+        session: { access_token: 'test-token' },
+        isLoading: false,
+        signOut: jest.fn(),
+    }),
+    AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 // Mock dreamService
 jest.mock('@/services/dreamService', () => ({
     dreamService: {
-        seed: jest.fn(),
         getDreams: jest.fn(),
         getCharacters: jest.fn(),
         getLocations: jest.fn(),
@@ -36,13 +60,15 @@ const TestComponent = () => {
 describe('DreamContext', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        // Setup default mock returns
+        (dreamService.getDreams as jest.Mock).mockResolvedValue([]);
+        (dreamService.getCharacters as jest.Mock).mockResolvedValue([]);
+        (dreamService.getLocations as jest.Mock).mockResolvedValue([]);
+        (dreamService.getStats as jest.Mock).mockResolvedValue(null);
     });
 
     it('loads initial data correctly', async () => {
-        (dreamService.getDreams as jest.Mock).mockReturnValue([{ id: '1', title: 'Test Dream' }]);
-        (dreamService.getCharacters as jest.Mock).mockReturnValue([]);
-        (dreamService.getLocations as jest.Mock).mockReturnValue([]);
-        (dreamService.getStats as jest.Mock).mockReturnValue(null);
+        (dreamService.getDreams as jest.Mock).mockResolvedValue([{ id: '1', title: 'Test Dream' }]);
 
         render(
             <DreamProvider>
@@ -56,9 +82,7 @@ describe('DreamContext', () => {
     });
 
     it('handles data loading errors', async () => {
-        (dreamService.seed as jest.Mock).mockImplementation(() => {
-            throw new Error('Storage full');
-        });
+        (dreamService.getDreams as jest.Mock).mockRejectedValue(new Error('Network error'));
 
         // Suppress console.error for this test
         const originalError = console.error;
@@ -71,17 +95,14 @@ describe('DreamContext', () => {
         );
 
         await waitFor(() => {
-            expect(screen.getByTestId('error-message')).toHaveTextContent('Failed to load your dreams');
+            expect(screen.getByTestId('error-message')).toHaveTextContent('Failed to load data.');
         });
 
         console.error = originalError;
     });
 
     it('adds a dream successfully', async () => {
-        (dreamService.getDreams as jest.Mock).mockReturnValue([]);
-        (dreamService.getCharacters as jest.Mock).mockReturnValue([]);
-        (dreamService.getLocations as jest.Mock).mockReturnValue([]);
-        (dreamService.getStats as jest.Mock).mockReturnValue(null);
+        (dreamService.saveDream as jest.Mock).mockResolvedValue({ id: '1', title: 'New Dream' });
 
         render(
             <DreamProvider>
@@ -89,12 +110,16 @@ describe('DreamContext', () => {
             </DreamProvider>
         );
 
+        await waitFor(() => {
+            expect(screen.getByTestId('dream-count')).toHaveTextContent('0');
+        });
+
         const addButton = screen.getByText('Add Dream');
 
-        // Update mock for subsequent calls
-        (dreamService.getDreams as jest.Mock).mockReturnValue([{ id: '1', title: 'New Dream' }]);
+        // Update mock for subsequent calls after save
+        (dreamService.getDreams as jest.Mock).mockResolvedValue([{ id: '1', title: 'New Dream' }]);
 
-        act(() => {
+        await act(async () => {
             addButton.click();
         });
 

@@ -3,9 +3,18 @@
 import { useState } from "react";
 import { DreamList } from "@/components/journal/DreamList";
 import { AddDreamForm } from "@/components/journal/AddDreamForm";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AnimatePresence } from "framer-motion";
 
 export default function JournalPage() {
+    return (
+        <ProtectedRoute>
+            <JournalContent />
+        </ProtectedRoute>
+    );
+}
+
+function JournalContent() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     return (
@@ -40,3 +49,4 @@ export default function JournalPage() {
         </div>
     );
 }
+

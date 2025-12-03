@@ -10,77 +10,84 @@ interface VoiceInputProps {
     className?: string;
 }
 
+// Check browser support outside component to avoid setState in effect
+const isBrowserSupported = typeof window !== "undefined" && 
+    (window.SpeechRecognition || window.webkitSpeechRecognition);
+
 export function VoiceInput({ onResult, onToggle, className = "" }: VoiceInputProps) {
     const [isListening, setIsListening] = useState(false);
+    const [error, setError] = useState<string | null>(!isBrowserSupported ? "Browser not supported" : null);
     const recognitionRef = useRef<SpeechRecognition | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const onResultRef = useRef(onResult);
+    const onToggleRef = useRef(onToggle);
+
+    // Keep refs updated
+    useEffect(() => {
+        onResultRef.current = onResult;
+        onToggleRef.current = onToggle;
+    }, [onResult, onToggle]);
 
     const stopListening = useCallback(() => {
         if (recognitionRef.current) {
             recognitionRef.current.stop();
             setIsListening(false);
-            onToggle?.(false);
+            onToggleRef.current?.(false);
         }
-    }, [onToggle]);
+    }, []);
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                const recognitionInstance = new SpeechRecognition();
-                recognitionInstance.continuous = true;
-                recognitionInstance.interimResults = true;
-                recognitionInstance.lang = "en-US";
+        if (typeof window === "undefined" || !isBrowserSupported) return;
 
-                recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
-                    let finalTranscript = "";
-                    for (let i = event.resultIndex; i < event.results.length; ++i) {
-                        if (event.results[i].isFinal) {
-                            finalTranscript += event.results[i][0].transcript;
-                        }
-                    }
-                    if (finalTranscript) {
-                        onResult(finalTranscript);
-                    }
-                };
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognitionInstance = new SpeechRecognition();
+        recognitionInstance.continuous = true;
+        recognitionInstance.interimResults = true;
+        recognitionInstance.lang = "en-US";
 
-                recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
-                    console.error("Speech recognition error", event.error);
-                    setError("Error accessing microphone");
-                    if (recognitionRef.current) {
-                        recognitionRef.current.stop();
-                        setIsListening(false);
-                        onToggle?.(false);
-                    }
-                };
-
-                recognitionInstance.onend = () => {
-                    if (isListening) {
-                        setIsListening(false);
-                        onToggle?.(false);
-                    }
-                };
-
-                recognitionRef.current = recognitionInstance;
-            } else {
-                setError("Browser not supported");
+        recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
+            let finalTranscript = "";
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                }
             }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [onResult, isListening, onToggle]);
+            if (finalTranscript) {
+                onResultRef.current(finalTranscript);
+            }
+        };
+
+        recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
+            console.error("Speech recognition error", event.error);
+            setError("Error accessing microphone");
+            recognitionInstance.stop();
+            setIsListening(false);
+            onToggleRef.current?.(false);
+        };
+
+        recognitionInstance.onend = () => {
+            setIsListening(false);
+            onToggleRef.current?.(false);
+        };
+
+        recognitionRef.current = recognitionInstance;
+
+        return () => {
+            recognitionInstance.stop();
+        };
+    }, []);
 
     const startListening = useCallback(() => {
         if (recognitionRef.current) {
             try {
                 recognitionRef.current.start();
                 setIsListening(true);
-                onToggle?.(true);
+                onToggleRef.current?.(true);
                 setError(null);
             } catch (e) {
                 console.error(e);
             }
         }
-    }, [onToggle]);
+    }, []);
 
     const toggleListening = () => {
         if (isListening) {

@@ -1,97 +1,97 @@
 import { dreamService } from '../dreamService';
-import { Dream } from '@/types';
+import { supabase } from '@/lib/supabaseClient';
 
-// Mock localStorage
-const localStorageMock = (function () {
-    let store: Record<string, string> = {};
-    return {
-        getItem: function (key: string) {
-            return store[key] || null;
-        },
-        setItem: function (key: string, value: string) {
-            store[key] = value.toString();
-        },
-        clear: function () {
-            store = {};
-        },
-        removeItem: function (key: string) {
-            delete store[key];
+// Mock Supabase client
+jest.mock('@/lib/supabaseClient', () => ({
+    supabase: {
+        from: jest.fn(),
+        auth: {
+            getUser: jest.fn()
         }
-    };
-})();
+    }
+}));
 
-Object.defineProperty(window, 'localStorage', {
-    value: localStorageMock
-});
+const mockSupabase = supabase as jest.Mocked<typeof supabase>;
 
 describe('dreamService', () => {
     beforeEach(() => {
-        window.localStorage.clear();
+        jest.clearAllMocks();
     });
 
-    it('should save and retrieve dreams', () => {
-        const dream: Dream = {
-            id: '1',
-            title: 'Test Dream',
-            content: 'This is a test dream',
-            date: new Date().toISOString(),
-            type: 'normal',
-            sentiment: 0.5,
-            clarity: 5,
-            characterIds: [],
-            locationIds: [],
-            tags: []
-        };
+    describe('getDreams', () => {
+        it('should fetch and transform dreams correctly', async () => {
+            const mockDreams = [
+                {
+                    id: '1',
+                    title: 'Test Dream',
+                    content: 'Dream content',
+                    date: '2024-01-01T00:00:00Z',
+                    type: 'normal',
+                    sentiment: 0.5,
+                    clarity: 5,
+                    tags: ['flying'],
+                    dream_characters: [{ character_id: 'char-1' }],
+                    dream_locations: [{ location_id: 'loc-1' }]
+                }
+            ];
 
-        dreamService.saveDream(dream);
-        const dreams = dreamService.getDreams();
-        expect(dreams).toHaveLength(1);
-        expect(dreams[0].title).toBe('Test Dream');
+            (mockSupabase.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnValue({
+                    order: jest.fn().mockResolvedValue({ data: mockDreams, error: null })
+                })
+            });
+
+            const dreams = await dreamService.getDreams();
+
+            expect(dreams).toHaveLength(1);
+            expect(dreams[0].title).toBe('Test Dream');
+            expect(dreams[0].characterIds).toEqual(['char-1']);
+            expect(dreams[0].locationIds).toEqual(['loc-1']);
+        });
+
+        it('should throw error when fetch fails', async () => {
+            (mockSupabase.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnValue({
+                    order: jest.fn().mockResolvedValue({ data: null, error: new Error('Fetch failed') })
+                })
+            });
+
+            await expect(dreamService.getDreams()).rejects.toThrow('Fetch failed');
+        });
     });
 
-    it('should calculate streak correctly', () => {
-        // Mock dreams for streak calculation
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
+    describe('getStats', () => {
+        it('should return empty stats when no dreams exist', async () => {
+            (mockSupabase.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnValue({
+                    order: jest.fn().mockResolvedValue({ data: [], error: null })
+                })
+            });
 
-        const dream1: Dream = {
-            id: '1',
-            title: 'Today Dream',
-            content: '...',
-            date: today.toISOString(),
-            type: 'normal',
-            sentiment: 0.5,
-            clarity: 5,
-            characterIds: [],
-            locationIds: [],
-            tags: []
-        };
+            const stats = await dreamService.getStats();
 
-        const dream2: Dream = {
-            id: '2',
-            title: 'Yesterday Dream',
-            content: '...',
-            date: yesterday.toISOString(),
-            type: 'normal',
-            sentiment: 0.5,
-            clarity: 5,
-            characterIds: [],
-            locationIds: [],
-            tags: []
-        };
+            expect(stats.totalDreams).toBe(0);
+            expect(stats.streak).toBe(0);
+            expect(stats.lastRecorded).toBeNull();
+        });
 
-        dreamService.saveDream(dream2);
-        dreamService.saveDream(dream1);
+        it('should calculate stats correctly', async () => {
+            const mockDreams = [
+                { date: new Date().toISOString(), clarity: 8, sentiment: 0.8 },
+                { date: new Date().toISOString(), clarity: 6, sentiment: 0.6 }
+            ];
 
-        const stats = dreamService.getStats();
-        // Note: The actual implementation might vary slightly depending on how it handles "current streak" vs "longest streak" logic
-        // But based on our fix, it should be at least 2 if we have today and yesterday.
-        // Let's just check if it returns a number for now, or check specific logic if we recall it.
-        // The fix was: if (today === lastDreamDate || today - lastDreamDate === 86400000) streak = 1;
-        // Wait, the fix in the walkthrough said "Implemented robust logic".
-        // Let's verify it returns a valid stats object.
-        expect(stats).not.toBeNull();
-        expect(stats?.streak).toBeGreaterThanOrEqual(1);
+            (mockSupabase.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnValue({
+                    order: jest.fn().mockResolvedValue({ data: mockDreams, error: null })
+                })
+            });
+
+            const stats = await dreamService.getStats();
+
+            expect(stats.totalDreams).toBe(2);
+            expect(stats.averageClarity).toBe(7);
+            expect(stats.averageSentiment).toBe(0.7);
+        });
     });
 });
