@@ -70,7 +70,7 @@ export function Navigation() {
                                 Sign In
                             </span>
                         </Link>
-                        <Link href="/signup" className="group relative overflow-hidden bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
+                        <Link href="/signup" className="bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
                             Sign Up
                         </Link>
                     </>

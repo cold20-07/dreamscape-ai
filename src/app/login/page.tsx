@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authService } from "@/services/authService";
 import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -24,7 +25,7 @@ export default function LoginPage() {
             setError(error.message);
             setLoading(false);
         } else {
-            router.push("/");
+            router.push("/dashboard");
             router.refresh();
         }
     };
@@ -83,9 +84,16 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="group relative flex w-full justify-center rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="group relative flex w-full justify-center items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                            {loading ? "Signing in..." : "Sign in"}
+                            {loading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Signing in...
+                                </>
+                            ) : (
+                                "Sign in"
+                            )}
                         </button>
                     </div>
                 </form>
