@@ -121,7 +121,7 @@ export default function SignupPage() {
                     </h2>
                     <p className="mt-2 text-sm text-gray-400">
                         {step === "email" && "Enter your email to get started"}
-                        {step === "otp" && `Enter the 6-digit code sent to ${email}`}
+                        {step === "otp" && `Enter the 8-digit code sent to ${email}`}
                         {step === "password" && "Create a password for future logins"}
                     </p>
                 </div>
@@ -194,11 +194,11 @@ export default function SignupPage() {
                                 inputMode="numeric"
                                 autoComplete="one-time-code"
                                 required
-                                maxLength={6}
+                                maxLength={8}
                                 value={otp}
                                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                                className="relative block w-full rounded-lg border border-white/10 bg-black/50 px-4 py-4 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 text-center text-2xl tracking-[0.5em] font-mono"
-                                placeholder="000000"
+                                className="relative block w-full rounded-lg border border-white/10 bg-black/50 px-4 py-4 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 text-center text-2xl tracking-[0.3em] font-mono"
+                                placeholder="00000000"
                             />
                         </div>
 
@@ -210,7 +210,7 @@ export default function SignupPage() {
 
                         <button
                             type="submit"
-                            disabled={loading || otp.length !== 6}
+                            disabled={loading || otp.length !== 8}
                             className="group relative flex w-full justify-center items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             {loading ? (
