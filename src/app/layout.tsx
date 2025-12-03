@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { DreamProvider } from "@/context/DreamContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -32,11 +33,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="antialiased min-h-screen bg-black text-white overflow-x-hidden">
-        <DreamProvider>
-          <MainLayout>
-            {children}
-          </MainLayout>
-        </DreamProvider>
+        <AuthProvider>
+          <DreamProvider>
+            <MainLayout>
+              {children}
+            </MainLayout>
+          </DreamProvider>
+        </AuthProvider>
       </body>
     </html>
   );

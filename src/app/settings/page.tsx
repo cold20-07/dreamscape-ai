@@ -7,24 +7,30 @@ import { Download, Trash2, User, Bell, Shield } from "lucide-react";
 export default function SettingsPage() {
     const [isExporting, setIsExporting] = useState(false);
 
-    const handleExport = () => {
+    const handleExport = async () => {
         setIsExporting(true);
-        const data = dreamService.exportData();
-        const blob = new Blob([data], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `dreamscape-backup-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        setTimeout(() => setIsExporting(false), 1000);
+        try {
+            const data = await dreamService.exportData();
+            const blob = new Blob([data], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `dreamscape-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Export failed:", error);
+            alert("Failed to export data.");
+        } finally {
+            setTimeout(() => setIsExporting(false), 1000);
+        }
     };
 
-    const handleClearData = () => {
+    const handleClearData = async () => {
         if (confirm("Are you sure? This will delete ALL your dreams, characters, and locations. This action cannot be undone.")) {
-            dreamService.clearAll();
+            await dreamService.clearAll();
             window.location.reload();
         }
     };

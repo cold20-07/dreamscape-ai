@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { Dream, Location, Character, DreamStats } from "@/types";
 import { dreamService } from "@/services/dreamService";
+import { useAuth } from "@/context/AuthContext";
 
 interface DreamContextType {
     dreams: Dream[];
@@ -11,118 +12,124 @@ interface DreamContextType {
     stats: DreamStats | null;
     isLoading: boolean;
     error: string | null;
-    addDream: (dream: Dream) => void;
-    deleteDream: (id: string) => void;
-    addCharacter: (character: Character) => void;
-    deleteCharacter: (id: string) => void;
-    addLocation: (location: Location) => void;
-    deleteLocation: (id: string) => void;
-    refreshData: () => void;
+    addDream: (dream: Dream) => Promise<void>;
+    deleteDream: (id: string) => Promise<void>;
+    addCharacter: (character: Character) => Promise<void>;
+    deleteCharacter: (id: string) => Promise<void>;
+    addLocation: (location: Location) => Promise<void>;
+    deleteLocation: (id: string) => Promise<void>;
+    refreshData: () => Promise<void>;
 }
 
 const DreamContext = createContext<DreamContextType | undefined>(undefined);
 
 export function DreamProvider({ children }: { children: React.ReactNode }) {
+    const { user } = useAuth();
     const [dreams, setDreams] = useState<Dream[]>([]);
     const [characters, setCharacters] = useState<Character[]>([]);
     const [locations, setLocations] = useState<Location[]>([]);
     const [stats, setStats] = useState<DreamStats | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false); // Start false, load when user exists
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        // Seed data if needed (only runs on client)
-        if (typeof window !== "undefined") {
-            try {
-                dreamService.seed();
-                const dreams = dreamService.getDreams();
-                const characters = dreamService.getCharacters();
-                const locations = dreamService.getLocations();
-                const stats = dreamService.getStats();
-
-                setDreams(dreams);
-                setCharacters(characters);
-                setLocations(locations);
-                setStats(stats);
-            } catch (err) {
-                console.error("Failed to load dream data:", err);
-                setError("Failed to load your dreams. Local storage might be corrupted.");
-            } finally {
-                setIsLoading(false);
-            }
+    const refreshData = useCallback(async () => {
+        if (!user) {
+            setDreams([]);
+            setCharacters([]);
+            setLocations([]);
+            setStats(null);
+            return;
         }
-    }, []);
 
-    const refreshData = useCallback(() => {
+        setIsLoading(true);
         try {
-            setDreams(dreamService.getDreams());
-            setCharacters(dreamService.getCharacters());
-            setLocations(dreamService.getLocations());
-            setStats(dreamService.getStats());
+            const [fetchedDreams, fetchedCharacters, fetchedLocations, fetchedStats] = await Promise.all([
+                dreamService.getDreams(),
+                dreamService.getCharacters(),
+                dreamService.getLocations(),
+                dreamService.getStats()
+            ]);
+
+            setDreams(fetchedDreams);
+            setCharacters(fetchedCharacters);
+            setLocations(fetchedLocations);
+            setStats(fetchedStats);
             setError(null);
         } catch (err) {
             console.error("Failed to refresh data:", err);
-            setError("Failed to refresh data.");
+            setError("Failed to load data.");
+        } finally {
+            setIsLoading(false);
         }
-    }, []);
+    }, [user]);
 
-    const addDream = (dream: Dream) => {
+    useEffect(() => {
+        refreshData();
+    }, [refreshData]);
+
+    const addDream = async (dream: Dream) => {
         try {
-            dreamService.saveDream(dream);
-            refreshData();
+            await dreamService.saveDream(dream);
+            await refreshData();
         } catch (err) {
             console.error("Failed to save dream:", err);
             setError("Failed to save dream.");
+            throw err;
         }
     };
 
-    const deleteDream = (id: string) => {
+    const deleteDream = async (id: string) => {
         try {
-            dreamService.deleteDream(id);
-            refreshData();
+            await dreamService.deleteDream(id);
+            await refreshData();
         } catch (err) {
             console.error("Failed to delete dream:", err);
             setError("Failed to delete dream.");
+            throw err;
         }
     };
 
-    const addCharacter = (character: Character) => {
+    const addCharacter = async (character: Character) => {
         try {
-            dreamService.saveCharacter(character);
-            refreshData();
+            await dreamService.saveCharacter(character);
+            await refreshData();
         } catch (err) {
             console.error("Failed to save character:", err);
             setError("Failed to save character.");
+            throw err;
         }
     };
 
-    const deleteCharacter = (id: string) => {
+    const deleteCharacter = async (id: string) => {
         try {
-            dreamService.deleteCharacter(id);
-            refreshData();
+            await dreamService.deleteCharacter(id);
+            await refreshData();
         } catch (err) {
             console.error("Failed to delete character:", err);
             setError("Failed to delete character.");
+            throw err;
         }
     };
 
-    const addLocation = (location: Location) => {
+    const addLocation = async (location: Location) => {
         try {
-            dreamService.saveLocation(location);
-            refreshData();
+            await dreamService.saveLocation(location);
+            await refreshData();
         } catch (err) {
             console.error("Failed to save location:", err);
             setError("Failed to save location.");
+            throw err;
         }
     };
 
-    const deleteLocation = (id: string) => {
+    const deleteLocation = async (id: string) => {
         try {
-            dreamService.deleteLocation(id);
-            refreshData();
+            await dreamService.deleteLocation(id);
+            await refreshData();
         } catch (err) {
             console.error("Failed to delete location:", err);
             setError("Failed to delete location.");
+            throw err;
         }
     };
 
